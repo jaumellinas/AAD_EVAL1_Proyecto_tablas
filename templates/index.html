@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="es" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.4/css/bulma.min.css">
+    <title>{{ db_name }} | Visor de BBDD</title>
+    <style>
+        .table-container-wrapper {
+            display: none;
+        }
+        .table-container-wrapper.is-active {
+            display: block;
+        }
+
+        .panel-tabs {
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            display: block;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .panel-tabs::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .panel-tabs a {
+            display: inline-block;
+            white-space: nowrap;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+        }
+
+        .table-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
+
+        .footer-custom {
+            margin-top: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <section class="section">
+        <div class="container">
+            <nav class="panel">
+                <p class="panel-heading">{{ db_name }}</p>
+                <p class="panel-tabs">
+                    {% for table_name in data.keys() %}
+                        <a class="table-tab {% if loop.first %}is-active{% endif %}" data-table="{{ table_name }}">
+                            {{ table_name }}
+                        </a>
+                    {% endfor %}
+                </p>
+            </nav>
+
+            {% for table_name, table_data in data.items() %}
+                <div class="table-container-wrapper {% if loop.first %}is-active{% endif %}" id="table-{{ table_name }}">
+                    <div class="box">
+                        <h2 class="title is-4">{{ table_name }}</h2>
+
+                        {% if table_data.rows %}
+                            <div class="table-container">
+                                <table class="table is-striped is-hoverable is-fullwidth">
+                                    <thead>
+                                        <tr>
+                                            {% for column in table_data.columns %}
+                                                <th>{{ column }}</th>
+                                            {% endfor %}
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for row in table_data.rows %}
+                                            <tr>
+                                                {% for value in row %}
+                                                    <td>{{ value }}</td>
+                                                {% endfor %}
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        {% else %}
+                            <div class="notification is-warning">
+                                No hay datos en esta tabla.
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+
+            <div class="box footer-custom has-text-centered">
+                <p>© 2025 por <b>Jaume Llinàs</b>. Hecho para la asignatura de <b>Accés a Dades</b>. Código fuente <a href="https://www.github.com/jaumellinas" target="_blank">disponible en GitHub</a>.</p>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Script para manejar el cambio entre tablas
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.table-tab');
+            const tableContainers = document.querySelectorAll('.table-container-wrapper');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetTable = tab.getAttribute('data-table');
+
+                    // Remover clase active de todos los tabs
+                    tabs.forEach(t => t.classList.remove('is-active'));
+
+                    // Agregar clase active al tab clickeado
+                    tab.classList.add('is-active');
+
+                    // Ocultar todas las tablas
+                    tableContainers.forEach(container => {
+                        container.classList.remove('is-active');
+                    });
+
+                    // Mostrar la tabla seleccionada
+                    document.getElementById(`table-${targetTable}`).classList.add('is-active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
